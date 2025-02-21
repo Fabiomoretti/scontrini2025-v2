@@ -1,0 +1,478 @@
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary-color: #64748b;
+  --success-color: #059669;
+  --danger-color: #dc2626;
+  --warning-color: #d97706;
+  --background-color: #f8fafc;
+  --card-background: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.header h1 {
+  margin: 0;
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.form-section, .table-section {
+  background: var(--card-background);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.center-management {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.center-select {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background-color: var(--card-background);
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.center-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.new-center-button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.new-center-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.new-center-form {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.new-center-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.new-center-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.create-center-button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.create-center-button:hover {
+  background-color: #047857;
+}
+
+.file-input {
+  width: 100%;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.file-input:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+.file-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--background-color);
+}
+
+.warning {
+  color: var(--warning-color);
+  background-color: #fef3c7;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.loading {
+  color: var(--primary-color);
+  font-style: italic;
+  margin: 1rem 0;
+}
+
+.error {
+  color: var(--danger-color);
+  background-color: #fee2e2;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.5rem 0;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--background-color);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+th:first-child {
+  border-top-left-radius: var(--radius-md);
+}
+
+th:last-child {
+  border-top-right-radius: var(--radius-md);
+}
+
+tr:last-child td:first-child {
+  border-bottom-left-radius: var(--radius-md);
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: var(--radius-md);
+}
+
+tr:hover td {
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+td {
+  background-color: var(--card-background);
+  transition: all 0.2s ease;
+}
+
+.total {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: var(--radius-md);
+  text-align: right;
+}
+
+.total h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 3rem 0;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem auto;
+  }
+
+  .header {
+    padding: 1.5rem;
+  }
+
+  .form-section, .table-section {
+    padding: 1.5rem;
+  }
+
+  .center-management {
+    flex-direction: column;
+  }
+
+  .new-center-form {
+    flex-direction: column;
+  }
+
+  .create-center-button {
+    width: 100%;
+  }
+
+  th, td {
+    padding: 0.75rem;
+  }
+}
+
+/* Animazioni */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section, .table-section {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Stili per il focus accessibile */
+:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+/* Scrollbar personalizzata */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Stili per i pulsanti di azione */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.edit-button, .delete-button, .save-button, .cancel-button, .view-receipt-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.delete-button {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #b91c1c;
+}
+
+.save-button {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #047857;
+}
+
+.cancel-button {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #475569;
+}
+
+.view-receipt-button {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.view-receipt-button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.view-receipt-button:active {
+  transform: translateY(0);
+}
+
+/* Stili per gli input di modifica */
+.edit-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Responsive design per i pulsanti di azione */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .edit-button, .delete-button, .save-button, .cancel-button, .view-receipt-button {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.export-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.export-button:hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+}
+
+.export-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .table-actions {
+    flex-direction: column;
+  }
+  
+  .export-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

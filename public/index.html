@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Analyzer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .image-preview {
+      max-width: 100%;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .analysis {
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid #dee2e6;
+    }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
+    .error {
+      color: #dc3545;
+      padding: 10px;
+      background: #f8d7da;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+      padding: 10px;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #202124;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Analyzer</h1>
+    <input type="file" accept="image/*" id="imageInput">
+    <div id="preview"></div>
+    <div id="result"></div>
+  </div>
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const result = document.getElementById('result');
+
+    imageInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 20 * 1024 * 1024) { // 20MB limit
+          result.innerHTML = `
+            <div class="error">
+              Image size too large. Please choose an image under 20MB.
+            </div>
+          `;
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          try {
+            // Show image preview
+            preview.innerHTML = `<img src="${reader.result}" class="image-preview">`;
+            result.innerHTML = '<p class="loading">Analyzing image...</p>';
+
+            const response = await fetch('/analyze', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ image: reader.result })
+            });
+
+            if (!response.ok) {
+              throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            result.innerHTML = `
+              <div class="analysis">
+                <h2>Analysis Result:</h2>
+                <p>${data.analysis || data.error}</p>
+              </div>
+            `;
+          } catch (error) {
+            console.error('Error:', error);
+            result.innerHTML = `
+              <div class="error">
+                <h2>Error:</h2>
+                <p>${error.message || 'Failed to analyze image. Please try again.'}</p>
+              </div>
+            `;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
