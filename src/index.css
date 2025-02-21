@@ -155,6 +155,8 @@ h2 {
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
   margin: 1rem 0;
+  width: calc(100% - 2rem);
+  box-sizing: border-box;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -200,9 +202,7 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   margin: 1.5rem 0;
-  /* display: block;  Remove this line */
-  /* overflow-x: auto; Remove this line */
-  /* white-space: nowrap; Remove this line */
+  font-size: 0.85rem;
 }
 
 /* Responsive Table Container */
@@ -221,7 +221,7 @@ th {
   background-color: var(--background-color);
   font-weight: 600;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
