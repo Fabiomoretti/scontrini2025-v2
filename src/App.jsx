@@ -33,10 +33,26 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    // Check if videoRef.current is available and then set cameraReady to true
-    if (videoRef.current) {
-      setCameraReady(true);
-    }
+    let observer;
+
+    const checkVideoElement = () => {
+      if (videoRef.current) {
+        setCameraReady(true);
+      } else {
+        // If videoRef.current is still null, try again after a short delay
+        setTimeout(checkVideoElement, 100);
+      }
+    };
+
+    // Start checking for the video element
+    checkVideoElement();
+
+    // Cleanup function (optional)
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
   }, []);
 
   const fetchCenters = async () => {
@@ -445,7 +461,7 @@ const App = () => {
               className="file-input"
               disabled={!selectedCenter}
             />
-            {cameraReady && (
+            {cameraReady ? (
               <button
                 onClick={startCamera}
                 className="new-center-button"
@@ -453,8 +469,7 @@ const App = () => {
               >
                 Scatta Foto
               </button>
-            )}
-            {!cameraReady && (
+            ) : (
               <p className="loading">
                 Inizializzando la fotocamera...
               </p>
