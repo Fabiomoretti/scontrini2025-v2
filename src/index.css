@@ -194,20 +194,27 @@ h2 {
   font-size: 0.875rem;
 }
 
+/* Table Styles */
 table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 1.5rem 0;
-  display: block;
-  overflow-x: auto;
-  white-space: nowrap;
+  /* display: block;  Remove this line */
+  /* overflow-x: auto; Remove this line */
+  /* white-space: nowrap; Remove this line */
+}
+
+/* Responsive Table Container */
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling */
 }
 
 th, td {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  vertical-align: top; /* Align content to the top */
 }
 
 th {
@@ -242,6 +249,57 @@ tr:hover td {
 td {
   background-color: var(--card-background);
   transition: all 0.2s ease;
+}
+
+/* Mobile Styles for Table */
+@media (max-width: 768px) {
+  table {
+    border: 0;
+  }
+
+  .table-container thead {
+    display: none;
+  }
+
+  .table-container tr {
+    margin-bottom: 1rem;
+    display: block;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .table-container td {
+    display: block;
+    text-align: right;
+    font-size: 0.875rem;
+    border-bottom: 1px dotted var(--border-color);
+  }
+
+  .table-container td:last-child {
+    border-bottom: 0;
+  }
+
+  .table-container td::before {
+    content: attr(data-label);
+    float: left;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  /* Mobile Action Buttons */
+  .action-buttons {
+    flex-direction: row; /* Display buttons in a row */
+    justify-content: flex-end; /* Align buttons to the right */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+  }
+
+  .action-buttons .edit-button,
+  .action-buttons .delete-button,
+  .action-buttons .save-button,
+  .action-buttons .cancel-button,
+  .action-buttons .view-receipt-button {
+    width: auto; /* Adjust width to fit content */
+    margin: 0.25rem; /* Add spacing between buttons */
+  }
 }
 
 .total {
@@ -281,7 +339,7 @@ td {
   }
 
   .center-management {
-    flex-direction: column;
+    flex-direction: column; /* Stack the select and button */
   }
 
   .new-center-form {
@@ -424,12 +482,14 @@ td {
 /* Responsive design per i pulsanti di azione */
 @media (max-width: 768px) {
   .action-buttons {
-    flex-direction: column;
+    flex-direction: row; /* Display buttons in a row */
+    justify-content: flex-end; /* Align buttons to the right */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
   }
 
   .edit-button, .delete-button, .save-button, .cancel-button, .view-receipt-button {
-    width: 100%;
-    margin: 0.25rem 0;
+    width: auto; /* Adjust width to fit content */
+    margin: 0.25rem; /* Add spacing between buttons */
   }
 }
 

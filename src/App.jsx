@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import * as XLSX from 'xlsx'
@@ -23,6 +23,9 @@ const App = () => {
   const [showNewCenterForm, setShowNewCenterForm] = useState(false)
   const [newCenterName, setNewCenterName] = useState('')
   const [editingExpense, setEditingExpense] = useState(null)
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
 
   useEffect(() => {
     fetchCenters()
@@ -91,17 +94,61 @@ const App = () => {
   }
 
   const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    handleImage(file);
+  };
+
+  const handleTakePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (video && canvas) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      const imageDataUrl = canvas.toDataURL('image/jpeg');
+      setImage(imageDataUrl);
+      analyzeImage(imageDataUrl);
+      stopCamera();
+    } else {
+      setError('Impossibile scattare la foto. Riprova.');
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setIsCameraActive(true);
+      }
+    } catch (err) {
+      setError('Errore nell\'accesso alla fotocamera: ' + err.message);
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+      setIsCameraActive(false);
+    }
+  };
+
+  const handleImage = (file) => {
     if (!selectedCenter) {
       setError('Seleziona o crea un centro di spesa prima di caricare uno scontrino.')
       return
     }
 
-    const file = e.target.files[0]
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setImage(reader.result)
-        analyzeImage(reader.result)
+        const imgData = reader.result;
+        setImage(imgData);
+        analyzeImage(imgData);
       }
       reader.readAsDataURL(file)
     }
@@ -364,13 +411,37 @@ const App = () => {
         )}
 
         <h2>Carica Scontrino</h2>
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleImageUpload}
-          className="file-input"
-          disabled={!selectedCenter}
-        />
+        {!isCameraActive ? (
+          <>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="file-input"
+              disabled={!selectedCenter}
+            />
+            <button
+              onClick={startCamera}
+              className="new-center-button"
+              disabled={!selectedCenter}
+            >
+              Scatta Foto
+            </button>
+          </>
+        ) : (
+          <>
+            <video ref={videoRef} autoPlay playsInline className="video-preview"></video>
+            <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+            <div className="camera-buttons">
+              <button onClick={handleTakePhoto} className="create-center-button">
+                Scatta
+              </button>
+              <button onClick={stopCamera} className="cancel-button">
+                Annulla
+              </button>
+            </div>
+          </>
+        )}
         
         {!selectedCenter && (
           <p className="warning">
@@ -395,147 +466,149 @@ const App = () => {
                 Esporta in Excel
               </button>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Azienda</th>
-                  <th>Tipo Spesa</th>
-                  <th>Importo (€)</th>
-                  <th>Descrizione</th>
-                  <th>Scontrino</th>
-                  <th>Azioni</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map(expense => (
-                  <tr key={expense.id}>
-                    {editingExpense?.id === expense.id ? (
-                      <>
-                        <td>
-                          <input
-                            type="date"
-                            value={editingExpense.data_spesa ? editingExpense.data_spesa.split('T')[0] : ''}
-                            onChange={(e) => setEditingExpense({
-                              ...editingExpense,
-                              data_spesa: e.target.value
-                            })}
-                            className="edit-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={editingExpense.azienda}
-                            onChange={(e) => setEditingExpense({
-                              ...editingExpense,
-                              azienda: e.target.value
-                            })}
-                            className="edit-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={editingExpense.tipo_spesa}
-                            onChange={(e) => setEditingExpense({
-                              ...editingExpense,
-                              tipo_spesa: e.target.value
-                            })}
-                            className="edit-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={editingExpense.importo}
-                            onChange={(e) => setEditingExpense({
-                              ...editingExpense,
-                              importo: e.target.value
-                            })}
-                            className="edit-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={editingExpense.descrizione}
-                            onChange={(e) => setEditingExpense({
-                              ...editingExpense,
-                              descrizione: e.target.value
-                            })}
-                            className="edit-input"
-                          />
-                        </td>
-                        <td>
-                          {editingExpense.immagine_scontrino && (
-                            <button
-                              onClick={() => viewReceipt(editingExpense.immagine_scontrino)}
-                              className="view-receipt-button"
-                              type="button"
-                            >
-                              Visualizza
-                            </button>
-                          )}
-                        </td>
-                        <td className="action-buttons">
-                          <button
-                            onClick={handleUpdateExpense}
-                            className="save-button"
-                          >
-                            Salva
-                          </button>
-                          <button
-                            onClick={() => setEditingExpense(null)}
-                            className="cancel-button"
-                          >
-                            Annulla
-                          </button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td>
-                          {expense.data_spesa 
-                            ? new Date(expense.data_spesa).toLocaleDateString('it-IT')
-                            : '-'}
-                        </td>
-                        <td>{expense.azienda}</td>
-                        <td>{expense.tipo_spesa}</td>
-                        <td>{expense.importo.toFixed(2)}</td>
-                        <td>{expense.descrizione}</td>
-                        <td>
-                          {expense.immagine_scontrino && (
-                            <button
-                              onClick={() => viewReceipt(expense.immagine_scontrino)}
-                              className="view-receipt-button"
-                              title="Visualizza scontrino"
-                            >
-                              Visualizza
-                            </button>
-                          )}
-                        </td>
-                        <td className="action-buttons">
-                          <button
-                            onClick={() => handleEdit(expense)}
-                            className="edit-button"
-                          >
-                            Modifica
-                          </button>
-                          <button
-                            onClick={() => handleDelete(expense.id)}
-                            className="delete-button"
-                          >
-                            Elimina
-                          </button>
-                        </td>
-                      </>
-                    )}
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Azienda</th>
+                    <th>Tipo Spesa</th>
+                    <th>Importo (€)</th>
+                    <th>Descrizione</th>
+                    <th>Scontrino</th>
+                    <th>Azioni</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {expenses.map(expense => (
+                    <tr key={expense.id}>
+                      {editingExpense?.id === expense.id ? (
+                        <>
+                          <td>
+                            <input
+                              type="date"
+                              value={editingExpense.data_spesa ? editingExpense.data_spesa.split('T')[0] : ''}
+                              onChange={(e) => setEditingExpense({
+                                ...editingExpense,
+                                data_spesa: e.target.value
+                              })}
+                              className="edit-input"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={editingExpense.azienda}
+                              onChange={(e) => setEditingExpense({
+                                ...editingExpense,
+                                azienda: e.target.value
+                              })}
+                              className="edit-input"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={editingExpense.tipo_spesa}
+                              onChange={(e) => setEditingExpense({
+                                ...editingExpense,
+                                tipo_spesa: e.target.value
+                              })}
+                              className="edit-input"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editingExpense.importo}
+                              onChange={(e) => setEditingExpense({
+                                ...editingExpense,
+                                importo: e.target.value
+                              })}
+                              className="edit-input"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              value={editingExpense.descrizione}
+                              onChange={(e) => setEditingExpense({
+                                ...editingExpense,
+                                descrizione: e.target.value
+                              })}
+                              className="edit-input"
+                            />
+                          </td>
+                          <td>
+                            {editingExpense.immagine_scontrino && (
+                              <button
+                                onClick={() => viewReceipt(editingExpense.immagine_scontrino)}
+                                className="view-receipt-button"
+                                type="button"
+                              >
+                                Visualizza
+                              </button>
+                            )}
+                          </td>
+                          <td className="action-buttons">
+                            <button
+                              onClick={handleUpdateExpense}
+                              className="save-button"
+                            >
+                              Salva
+                            </button>
+                            <button
+                              onClick={() => setEditingExpense(null)}
+                              className="cancel-button"
+                            >
+                              Annulla
+                            </button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td data-label="Data">
+                            {expense.data_spesa 
+                              ? new Date(expense.data_spesa).toLocaleDateString('it-IT')
+                              : '-'}
+                          </td>
+                          <td data-label="Azienda">{expense.azienda}</td>
+                          <td data-label="Tipo Spesa">{expense.tipo_spesa}</td>
+                          <td data-label="Importo (€)">{expense.importo.toFixed(2)}</td>
+                          <td data-label="Descrizione">{expense.descrizione}</td>
+                          <td data-label="Scontrino">
+                            {expense.immagine_scontrino && (
+                              <button
+                                onClick={() => viewReceipt(expense.immagine_scontrino)}
+                                className="view-receipt-button"
+                                title="Visualizza scontrino"
+                              >
+                                Visualizza
+                              </button>
+                            )}
+                          </td>
+                          <td className="action-buttons">
+                            <button
+                              onClick={() => handleEdit(expense)}
+                              className="edit-button"
+                            >
+                              Modifica
+                            </button>
+                            <button
+                              onClick={() => handleDelete(expense.id)}
+                              className="delete-button"
+                            >
+                              Elimina
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className="total">
               <h3>
                 Totale: €{expenses.reduce((acc, exp) => acc + (exp.importo || 0), 0).toFixed(2)}
