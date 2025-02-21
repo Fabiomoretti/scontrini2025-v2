@@ -38,7 +38,7 @@ const App = () => {
     const checkVideoElement = () => {
       if (videoRef.current) {
         setCameraReady(true);
-      } else {
+      } else if (!cameraReady) { //aggiunto controllo per evitare loop infinito
         // If videoRef.current is still null, try again after a short delay
         setTimeout(checkVideoElement, 100);
       }
@@ -123,7 +123,7 @@ const App = () => {
   };
 
   const handleTakePhoto = () => {
-    const video = videoRef.current;
+     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     if (video && canvas) {
@@ -140,33 +140,48 @@ const App = () => {
   };
 
   const startCamera = async () => {
-    setError(''); // Clear any previous errors
+    setError('');
+    setLoading(true); // Mostra "Inizializzando la fotocamera..."
+    console.log("startCamera: Inizio inizializzazione fotocamera");
+
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('getUserMedia is not supported in this browser.');
+        console.error("startCamera: getUserMedia non supportato");
+        throw new Error('getUserMedia non è supportato in questo browser.');
       }
+      console.log("startCamera: getUserMedia supportato");
 
-      if (!videoRef.current) {
-        throw new Error('Video element not found.');
+      const streamConstraints = { video: { facingMode: 'environment' } };
+      console.log("startCamera: Richiesta stream fotocamera");
+      const stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+      console.log("startCamera: Stream fotocamera ottenuto", stream);
+
+      if (videoRef.current) {
+        console.log("startCamera: Elemento video trovato", videoRef.current);
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          console.log("startCamera: Metadati video caricati");
+          videoRef.current.play().catch(err => {
+            console.error("Error playing video:", err);
+            setError("Error playing video: " + err.message);
+            stopCamera();
+          });
+        };
+        console.log("startCamera: Fotocamera attiva");
+        setIsCameraActive(true);
+      } else {
+        console.error("startCamera: Elemento video non trovato");
+        throw new Error('Elemento video non trovato.');
       }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-
-      videoRef.current.srcObject = stream;
-      videoRef.current.onloadedmetadata = () => {
-        videoRef.current.play().catch(err => {
-          console.error("Error playing video:", err);
-          setError("Error playing video: " + err.message);
-          stopCamera();
-        });
-      };
-      setIsCameraActive(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
       setError('Errore nell\'accesso alla fotocamera: ' + err.message);
       setIsCameraActive(false);
+    } finally {
+      setLoading(false); // Nascondi "Inizializzando la fotocamera..." indipendentemente dal risultato
     }
   };
+
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -411,12 +426,12 @@ const App = () => {
       <div className="header">
         <h1>Gestione Spese</h1>
       </div>
-      
+
       <div className="form-section">
         <h2>Gestione Centro di Spesa</h2>
         <div className="center-management">
-          <select 
-            onChange={handleCenterChange} 
+          <select
+            onChange={handleCenterChange}
             value={selectedCenter}
             className="center-select"
           >
@@ -427,8 +442,8 @@ const App = () => {
               </option>
             ))}
           </select>
-          
-          <button 
+
+          <button
             onClick={() => setShowNewCenterForm(!showNewCenterForm)}
             className="new-center-button"
           >
@@ -470,9 +485,11 @@ const App = () => {
                 Scatta Foto
               </button>
             ) : (
-              <p className="loading">
-                Inizializzando la fotocamera...
-              </p>
+              !isCameraActive && !error && ( // Mostra "Inizializzando..." solo se non attivo e senza errori
+                <p className="loading">
+                  Inizializzando la fotocamera...
+                </p>
+              )
             )}
           </>
         ) : (
@@ -490,12 +507,12 @@ const App = () => {
           </>
         )}
         
-        {!selectedCenter && (
+        {!selectedCenter && !isCameraActive && !loading && !(error) && ( //condizione per mostrare il warning corretta
           <p className="warning">
             Seleziona o crea un centro di spesa prima di caricare uno scontrino
           </p>
         )}
-        
+
         {loading && <p className="loading">Analisi in corso...</p>}
         {error && <div className="error">{error}</div>}
       </div>
