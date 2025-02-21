@@ -116,14 +116,31 @@ const App = () => {
   };
 
   const startCamera = async () => {
+    setError(''); // Clear any previous errors
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia is not supported in this browser.');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().catch(err => {
+            console.error("Error playing video:", err);
+            setError("Error playing video: " + err.message);
+            stopCamera();
+          });
+        };
         setIsCameraActive(true);
+      } else {
+        throw new Error('Video element not found.');
       }
     } catch (err) {
+      console.error("Error accessing camera:", err);
       setError('Errore nell\'accesso alla fotocamera: ' + err.message);
+      setIsCameraActive(false);
     }
   };
 
@@ -353,8 +370,8 @@ const App = () => {
     const container = document.createElement('div')
     container.style.display = 'flex'
     container.style.justifyContent = 'center'
-    container.style.alignItems = 'center'
-    container.style.height = '100%'
+    container.style.alignItems: 'center',
+    container.style.height: '100%',
     container.appendChild(img)
 
     const newWindow = window.open('', '_blank')
