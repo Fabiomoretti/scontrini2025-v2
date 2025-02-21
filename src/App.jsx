@@ -449,37 +449,43 @@ const App = () => {
         <h2>Carica Scontrino</h2>
         {!isCameraActive ? (
           <>
+
             <input
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
               className="file-input"
               disabled={!selectedCenter}
-            />
+             />
               <button
                 onClick={startCamera}
                 className="new-center-button"
                 disabled={!selectedCenter}
               >
                 Scatta Foto
+                 {console.log("Button Scatta Foto clicked, videoRef.current is:", videoRef.current)} {/* Log before startCamera call */}
+
               </button>
-             )}
+             
            </>
          ) : (
            <>
              <video ref={videoRef} autoPlay playsInline className="video-preview"></video>
              <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+             {console.log("Video block rendered, videoRef.current inside block is:", videoRef.current)} {/* Log inside video block */}
              <div className="camera-buttons">
                <button onClick={handleTakePhoto} className="create-center-button">
                  Scatta
                </button>
                <button onClick={stopCamera} className="cancel-button">
                  Annulla
-               </button>
-             </div>
-           </>
-         )}
-         
+
+                </button>
+              </div>
+            </>
+
+          )}
+          
         {!selectedCenter && !isCameraActive && !loading && !(error) && ( //condizione per mostrare il warning corretta
           <p className="warning">
             Seleziona o crea un centro di spesa prima di caricare uno scontrino
