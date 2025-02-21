@@ -229,7 +229,7 @@ const App = () => {
     setError('')
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4-vision-preview",
+        model: "gpt-4o", // Replaced with gpt-4o.  Change this if needed!
         messages: [
           {
             role: "user",
