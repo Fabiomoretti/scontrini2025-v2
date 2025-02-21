@@ -26,10 +26,18 @@ const App = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false); // New state
 
   useEffect(() => {
     fetchCenters()
   }, [])
+
+  useEffect(() => {
+    // Check if videoRef.current is available and then set cameraReady to true
+    if (videoRef.current) {
+      setCameraReady(true);
+    }
+  }, []);
 
   const fetchCenters = async () => {
     const { data, error } = await supabase.from('centri_spesa').select('*')
@@ -122,21 +130,21 @@ const App = () => {
         throw new Error('getUserMedia is not supported in this browser.');
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play().catch(err => {
-            console.error("Error playing video:", err);
-            setError("Error playing video: " + err.message);
-            stopCamera();
-          });
-        };
-        setIsCameraActive(true);
-      } else {
+      if (!videoRef.current) {
         throw new Error('Video element not found.');
       }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+
+      videoRef.current.srcObject = stream;
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current.play().catch(err => {
+          console.error("Error playing video:", err);
+          setError("Error playing video: " + err.message);
+          stopCamera();
+        });
+      };
+      setIsCameraActive(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
       setError('Errore nell\'accesso alla fotocamera: ' + err.message);
@@ -437,13 +445,20 @@ const App = () => {
               className="file-input"
               disabled={!selectedCenter}
             />
-            <button
-              onClick={startCamera}
-              className="new-center-button"
-              disabled={!selectedCenter}
-            >
-              Scatta Foto
-            </button>
+            {cameraReady && (
+              <button
+                onClick={startCamera}
+                className="new-center-button"
+                disabled={!selectedCenter}
+              >
+                Scatta Foto
+              </button>
+            )}
+            {!cameraReady && (
+              <p className="loading">
+                Inizializzando la fotocamera...
+              </p>
+            )}
           </>
         ) : (
           <>
