@@ -116,6 +116,18 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    if (isCameraActive) {
+      console.log("useEffect: isCameraActive is true, calling startCamera");
+      startCamera();
+    } else {
+      console.log("useEffect: isCameraActive is false, calling stopCamera");
+      stopCamera();
+    }
+  }, [isCameraActive]); // This effect runs whenever isCameraActive changes
+
+
+
   const startCamera = async () => {
     console.log("startCamera: videoRef.current valore all'inizio:", videoRef.current); // Aggiunto log
     setError('');
@@ -480,7 +492,7 @@ const App = () => {
               disabled={!selectedCenter}
              />
               <button
-                onClick={startCamera}
+                onClick={() => setIsCameraActive(true)}
                 className="new-center-button"
                 disabled={!selectedCenter}
               >
