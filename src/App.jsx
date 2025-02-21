@@ -362,23 +362,23 @@ const App = () => {
       return
     }
     
-    const img = document.createElement('img')
-    img.src = imageData
-    img.style.maxWidth = '100%'
-    img.style.maxHeight = '80vh'
+    const img = document.createElement('img');
+    img.src = imageData;
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '80vh';
 
-    const container = document.createElement('div')
-    container.style.display = 'flex'
-    container.style.justifyContent = 'center'
-    container.style.alignItems: 'center',
-    container.style.height: '100%',
-    container.appendChild(img)
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.alignItems = 'center';
+    container.style.height = '100%';
+    container.appendChild(img);
 
-    const newWindow = window.open('', '_blank')
+    const newWindow = window.open('', '_blank');
     if (newWindow) {
-      newWindow.document.body.style.margin = '0'
-      newWindow.document.body.style.backgroundColor = '#f8fafc'
-      newWindow.document.body.appendChild(container)
+      newWindow.document.body.style.margin = '0';
+      newWindow.document.body.style.backgroundColor = '#f8fafc';
+      newWindow.document.body.appendChild(container);
     }
   }
 
