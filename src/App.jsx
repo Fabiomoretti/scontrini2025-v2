@@ -500,6 +500,7 @@ const App = () => {
                  {console.log("Button Scatta Foto clicked, videoRef.current is:", videoRef.current)} {/* Log before startCamera call */}
 
               </button>
+             )}
            </>
          ) : (
            <>
