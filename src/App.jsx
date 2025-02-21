@@ -117,6 +117,7 @@ const App = () => {
   };
 
   const startCamera = async () => {
+    console.log("startCamera: videoRef.current valore all'inizio:", videoRef.current); // Aggiunto log
     setError('');
     setLoading(true); // Mostra "Inizializzando la fotocamera..."
     console.log("startCamera: Inizio inizializzazione fotocamera");
@@ -133,23 +134,25 @@ const App = () => {
       const stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
       console.log("startCamera: Stream fotocamera ottenuto", stream);
 
-      if (videoRef.current) {
-        console.log("startCamera: Elemento video trovato", videoRef.current);
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          console.log("startCamera: Metadati video caricati");
-          videoRef.current.play().catch(err => {
-            console.error("Error playing video:", err);
-            setError("Error playing video: " + err.message);
-            stopCamera();
-          });
-        };
-        console.log("startCamera: Fotocamera attiva");
-        setIsCameraActive(true);
-      } else {
+     if (!videoRef.current) { // Sposta il controllo videoRef.current qui per log più preciso
         console.error("startCamera: Elemento video non trovato");
+        console.log("startCamera: videoRef.current è:", videoRef.current); // Log aggiuntivo se null
         throw new Error('Elemento video non trovato.');
+     } else {
+       console.log("startCamera: Elemento video trovato", videoRef.current);
+       videoRef.current.srcObject = stream;
+       videoRef.current.onloadedmetadata = () => {
+         console.log("startCamera: Metadati video caricati");
+         videoRef.current.play().catch(err => {
+           console.error("Error playing video:", err);
+           setError("Error playing video: " + err.message);
+           stopCamera();
+         });
+       };
+       console.log("startCamera: Fotocamera attiva");
+       setIsCameraActive(true);
       }
+
     } catch (err) {
       console.error("Error accessing camera:", err);
       setError('Errore nell\'accesso alla fotocamera: ' + err.message);
@@ -460,7 +463,7 @@ const App = () => {
               >
                 Scatta Foto
               </button>
-             
+             )}
            </>
          ) : (
            <>
