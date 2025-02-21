@@ -125,18 +125,45 @@ const App = () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         console.error("startCamera: getUserMedia non supportato");
-        throw new Error('getUserMedia non è supportato in questo browser.');
+        setError('getUserMedia non è supportato in questo browser.');
+        return; // Exit early
       }
       console.log("startCamera: getUserMedia supportato");
 
-      const streamConstraints = { video: { facingMode: 'environment' } };
+      // 1. Try with specific facingMode (environment)
+      let streamConstraints = { video: { facingMode: 'environment' } };
       console.log("startCamera: Richiesta stream fotocamera");
-      const stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+      let stream;
+
+      try {
+          stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+      } catch (error) {
+          console.warn("Failed to get environment camera, trying user-facing camera", error);
+          // 2. Fallback to user-facing camera
+          streamConstraints = { video: { facingMode: 'user' } };
+          try {
+              stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+          } catch (userError) {
+              console.warn("Failed to get user-facing camera, trying any camera", userError);
+              // 3. Try without any facingMode constraint
+              streamConstraints = { video: true };
+              try {
+                  stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+              } catch (anyError) {
+                  console.error("Failed to get any camera", anyError);
+                  setError('Errore nell\'accesso alla fotocamera: ' + anyError.message);
+                  setIsCameraActive(false);
+                  setLoading(false);
+                  return; // Exit, no camera available
+              }
+          }
+      }
+
       console.log("startCamera: Stream fotocamera ottenuto", stream);
 
-     if (!videoRef.current) { // Sposta il controllo videoRef.current qui per log più preciso
+     if (!videoRef.current) {
         console.error("startCamera: Elemento video non trovato");
-        console.log("startCamera: videoRef.current è:", videoRef.current); // Log aggiuntivo se null
+        console.log("startCamera: videoRef.current è:", videoRef.current);
         throw new Error('Elemento video non trovato.');
      } else {
        console.log("startCamera: Elemento video trovato", videoRef.current);
@@ -145,18 +172,13 @@ const App = () => {
          console.log("startCamera: Metadati video caricati");
          videoRef.current.play().catch(err => {
            console.error("Error playing video:", err);
-           setError("Error playing video: " + err.message);
+           setError("Errore durante la riproduzione del video: " + err.message);
            stopCamera();
          });
        };
        console.log("startCamera: Fotocamera attiva");
        setIsCameraActive(true);
       }
-
-    } catch (err) {
-      console.error("Error accessing camera:", err);
-      setError('Errore nell\'accesso alla fotocamera: ' + err.message);
-      setIsCameraActive(false);
     } finally {
       setLoading(false); // Nascondi "Inizializzando la fotocamera..." indipendentemente dal risultato
     }
@@ -466,7 +488,7 @@ const App = () => {
                  {console.log("Button Scatta Foto clicked, videoRef.current is:", videoRef.current)} {/* Log before startCamera call */}
 
               </button>
-             
+             )}
            </>
          ) : (
            <>
